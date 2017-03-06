@@ -84,7 +84,9 @@ MAX_DEFINITIONS=0
 IMAGE=false
 MIN=false
 MAX=false
-TIMEOUT=90
+# Increasing timeout to 12 mins because some jobs have more than 100 tasks
+# and we experienced they can exceed 10 mins to come back to steady state
+TIMEOUT=720
 VERBOSE=false
 TAGVAR=false
 AWS_CLI=$(which aws)
