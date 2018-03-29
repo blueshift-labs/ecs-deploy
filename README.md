@@ -1,6 +1,8 @@
 ecs-deploy
 =================
 
+[ ![Codeship Status for silinternational/ecs-deploy](https://app.codeship.com/projects/393a91e0-da8d-0134-6603-1e487e818871/status?branch=master)](https://app.codeship.com/projects/203720)
+
 This script uses the Task Definition and Service entities in Amazon's ECS to instigate an automatic blue/green deployment.
 
 Usage
@@ -29,7 +31,9 @@ Usage
                                       Note: This number must be 1 or higher (i.e. keep only the current revision ACTIVE).
                                             Max definitions causes all task revisions not matching criteria to be deregistered, even if they're created manually.
                                             Script will only perform deregistration if deployment succeeds.
+        --enable-rollback             Rollback task definition if new version is not running before TIMEOUT
         -v | --verbose                Verbose output
+             --version                Display the version
 
     Examples:
       Simple (Using env vars for AWS settings):
@@ -46,6 +50,19 @@ Usage
 
     Notes:
       - If a tag is not found in image and an ENV var is not used via -e, it will default the tag to "latest"
+
+Installation
+------------
+
+* Install and configure [aws-cli](http://docs.aws.amazon.com/cli/latest/userguide/tutorial-ec2-ubuntu.html#install-cli)
+* Install [jq](https://github.com/stedolan/jq/wiki/Installation)
+* Install ecs-deploy:
+```
+curl https://raw.githubusercontent.com/silinternational/ecs-deploy/master/ecs-deploy | sudo tee -a /usr/bin/ecs-deploy
+sudo chmod +x /usr/bin/ecs-deploy
+
+```
+
 
 How it works
 ------------
@@ -153,7 +170,8 @@ Here's an example of a suitable custom policy for [AWS IAM](https://aws.amazon.c
         "ecs:RegisterTaskDefinition",
         "ecs:StartTask",
         "ecs:StopTask",
-        "ecs:UpdateService"
+        "ecs:UpdateService",
+        "iam:PassRole"
       ],
       "Resource": "*"
     }
@@ -167,3 +185,13 @@ Troubleshooting
    not, you'll see some error output from the AWS CLI, something like:
 
         You must specify a region. You can also configure your region by running "aws configure".
+
+Testing
+-------
+Automated tests are performed using [bats](https://github.com/sstephenson/bats).
+The goal of testing is to ensure that updates/changes do not break core functionality.
+Unfortunately not all of `ecs-deploy` is testable since portions interact with
+AWS APIs to perform actions. So for now any parsing/processing of data locally
+is tested.
+
+Any new functionality and pull requests should come with tests as well (if possible).
